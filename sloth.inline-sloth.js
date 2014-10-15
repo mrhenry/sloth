@@ -52,7 +52,7 @@ InlineSloth.prototype.wrap = function () {
   });
 
   this.$element.wrap($wrapper);
-}
+};
 
 InlineSloth.prototype.onLoad = function ($img) {
   var $wrapper = this.$element.closest('.sloth');
@@ -68,4 +68,21 @@ InlineSloth.prototype.onLoad = function ($img) {
   $wrapper.animate({ 'height': this.initialWidth / $img.width() * $img.height() }, 220, function () {
     $wrapper.css('height', '');
   });
+};
+
+/**
+ * Error handler
+ */
+InlineSloth.prototype.onError = function () {
+  var $wrapper = this.$element.closest('.sloth');
+
+  this.$element.hide().fadeIn(880, function () {
+    $wrapper
+      .removeClass('is-loading')
+      .addClass('is-errored');
+  });
+
+  try {
+    console.error("Could not load " + this.source);
+  } catch(err) {}
 };
