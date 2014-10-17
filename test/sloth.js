@@ -197,12 +197,11 @@ BackgroundSloth.prototype.onLoad = function ($img) {
  * Error handler
  */
 BackgroundSloth.prototype.onError = function () {
-  $element
-    .removeClass('is-loading')
-    .addClass('is-errored');
+  this.$element.removeClass('is-loading')
+               .addClass('is-errored');
 
   try {
-    console.error("Could not load " + this.source);
+    console.error('Could not load', this.source);
   } catch(err) {}
 };
 
@@ -284,13 +283,10 @@ InlineSloth.prototype.onLoad = function ($img) {
 InlineSloth.prototype.onError = function () {
   var $wrapper = this.$element.closest('.sloth');
 
-  this.$element.hide().fadeIn(880, function () {
-    $wrapper
-      .removeClass('is-loading')
-      .addClass('is-errored');
-  });
+  $wrapper.removeClass('is-loading')
+          .addClass('is-errored');
 
   try {
-    console.error("Could not load " + this.source);
-  } catch(err) {}
+    console.error('Could not load', this.source);
+  } catch (err) {}
 };
