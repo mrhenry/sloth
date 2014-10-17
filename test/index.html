@@ -93,6 +93,22 @@
       -webkit-animation-iteration-count: infinite;
       z-index: 0;
     }
+
+    .sloth.is-errored {
+      background-color: rgba(0,0,0, 0.5);
+      position: relative;
+    }
+
+    .sloth.is-errored:after {
+      color: white;
+      content: "Failed loading image";
+      font-size: 10px;
+      left: 0;
+      position: absolute;
+      right: 0;
+      text-align: center;
+      top: 45%;
+    }
   </style>
 </head>
 <body>
@@ -103,13 +119,13 @@
     </p>
     <h2>Lazy inline image</h2>
     <h3>Image without preset width</h3>
-    <img data-src="http://placekitten.com/g/1072/603" />
+    <img data-src="http://placekitten.com/g/1000/600" />
     <h3>Image with preset width (attribute)</h3>
     <img data-src="http://placekitten.com/g/800/450" width="450" />
     <h3>Image with percentual width (CSS)</h3>
-    <img data-src="http://placekitten.com/g/1072/603" style="width: 50%" />
+    <img data-src="http://placekitten.com/g/800/450" style="width: 50%" />
     <h3>Image with max-width: 100% / Responsive image</h3>
-    <img data-src="http://placekitten.com/g/1072/603" style="max-width: 100%" />
+    <img data-src="http://placekitten.com/g/800/450" style="max-width: 100%" />
     <h3>Image with predefined ratio 1:1</h3>
     <img data-src="http://placekitten.com/g/800/800" data-ratio="1:1" />
     <h3>Image with predefined width (attribute) and ratio 4:3</h3>
@@ -131,8 +147,11 @@
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere qui eius, nemo!</p>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis quisquam itaque illum quidem adipisci nostrum. Vel magni consectetur, optio porro recusandae eius est?</p>
     </div>
+    <h3>No image or faulty image</h3>
+    <img />
+    <img data-src="faulty-image.jpg" />
   </div>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script type="text/javascript" src="sloth.js"></script>
   <script type="text/javascript">
     Sloth.load('[data-src]');
