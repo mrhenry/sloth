@@ -53,11 +53,10 @@ BackgroundSloth.prototype.onLoad = function ($img) {
  * Error handler
  */
 BackgroundSloth.prototype.onError = function () {
-  $element
-    .removeClass('is-loading')
-    .addClass('is-errored');
+  this.$element.removeClass('is-loading')
+               .addClass('is-errored');
 
   try {
-    console.error("Could not load " + this.source);
+    console.error('Could not load', this.source);
   } catch(err) {}
 };

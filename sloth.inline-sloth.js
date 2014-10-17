@@ -76,13 +76,10 @@ InlineSloth.prototype.onLoad = function ($img) {
 InlineSloth.prototype.onError = function () {
   var $wrapper = this.$element.closest('.sloth');
 
-  this.$element.hide().fadeIn(880, function () {
-    $wrapper
-      .removeClass('is-loading')
-      .addClass('is-errored');
-  });
+  $wrapper.removeClass('is-loading')
+          .addClass('is-errored');
 
   try {
-    console.error("Could not load " + this.source);
-  } catch(err) {}
+    console.error('Could not load', this.source);
+  } catch (err) {}
 };
