@@ -7,7 +7,7 @@ var gulp   = require('gulp'),
 gulp.task('build', function () {
   gulp.src(['sloth.base.js', 'sloth.*-sloth.js'])
       .pipe(concat('sloth.js'))
-      .pipe(wrap('(function ($, window, document, undefined) { \'use strict\';  <%= contents %> }(jQuery, window, document))'))
+      .pipe(wrap('(function ($, window, document, undefined) {\r\n\r\n\'use strict\';\r\n\r\n<%= contents %>\r\n\r\n}(jQuery, window, document));\r\n'))
       .pipe(gulp.dest('dist'));
 
   gulp.src(['sloth.base.js', 'sloth.*-sloth.js'])

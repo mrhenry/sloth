@@ -1,3 +1,8 @@
+/**
+ * @constructor
+ *
+ * @param {jQuery object} $element Parent for all animated elements
+ */
 function Sloth($element) {
   if (typeof $element === 'undefined') {
     return;
@@ -13,10 +18,6 @@ function Sloth($element) {
     ratio: 16 / 9
   };
 
-  /**
-   * Parent for all animated elements
-   * @type {Object} Must be jQuery object
-   */
   this.$element = $element || $('[data-src]').first();
 
   this.isInline = this.$element[0].tagName.toLowerCase() === 'img';
@@ -32,6 +33,10 @@ function Sloth($element) {
   this.init().bind();
 }
 
+/**
+ * @todo
+ * Create a universal export so we don't have make it a global
+ */
 window.Sloth = Sloth;
 
 /**
@@ -54,6 +59,8 @@ Sloth.prototype.wrap = function () {};
 
 Sloth.prototype.onLoad = function () {};
 
+Sloth.prototype.onError = function () {};
+
 Sloth.prototype.calculateDimensions = function () {
   this.initialWidth = parseInt(this.$element.css('width'), 10);
   this.width = (this.$element.get(0).style.width !== '') ? this.$element.get(0).style.width : this.initialWidth;
@@ -68,6 +75,7 @@ Sloth.prototype.preload = function (callback) {
         callback($img);
         $img.remove();
       })
+      .error($.proxy(this.onError, this))
       .attr('src', this.source);
 };
 
@@ -133,6 +141,7 @@ Sloth.load = function (selector) {
   });
 };
 
+
 function BackgroundSloth($element, options) {
   Sloth.call(this, $element, options);
 }
@@ -182,6 +191,20 @@ BackgroundSloth.prototype.onLoad = function ($img) {
     $element.removeClass('is-loading');
   });
 };
+
+
+/**
+ * Error handler
+ */
+BackgroundSloth.prototype.onError = function () {
+  this.$element.removeClass('is-loading')
+               .addClass('is-errored');
+
+  try {
+    console.error('Could not load', this.source);
+  } catch(err) {}
+};
+
 function InlineSloth($element, options) {
   Sloth.call(this, $element, options);
 }
@@ -236,7 +259,7 @@ InlineSloth.prototype.wrap = function () {
   });
 
   this.$element.wrap($wrapper);
-}
+};
 
 InlineSloth.prototype.onLoad = function ($img) {
   var $wrapper = this.$element.closest('.sloth');
@@ -252,4 +275,18 @@ InlineSloth.prototype.onLoad = function ($img) {
   $wrapper.animate({ 'height': this.initialWidth / $img.width() * $img.height() }, 220, function () {
     $wrapper.css('height', '');
   });
+};
+
+/**
+ * Error handler
+ */
+InlineSloth.prototype.onError = function () {
+  var $wrapper = this.$element.closest('.sloth');
+
+  $wrapper.removeClass('is-loading')
+          .addClass('is-errored');
+
+  try {
+    console.error('Could not load', this.source);
+  } catch (err) {}
 };

@@ -47,3 +47,16 @@ BackgroundSloth.prototype.onLoad = function ($img) {
     $element.removeClass('is-loading');
   });
 };
+
+
+/**
+ * Error handler
+ */
+BackgroundSloth.prototype.onError = function () {
+  this.$element.removeClass('is-loading')
+               .addClass('is-errored');
+
+  try {
+    console.error('Could not load', this.source);
+  } catch(err) {}
+};
