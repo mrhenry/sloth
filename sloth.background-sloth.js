@@ -9,7 +9,11 @@ BackgroundSloth.prototype = new Sloth();
 BackgroundSloth.prototype.constructor = Sloth;
 
 BackgroundSloth.prototype.wrap = function () {
-  var $background = $('<div class="sloth__background" />');
+  var $background = $('<div class="sloth__background" />'),
+      backgroundProperties = {
+        'background': this.$element.css('background'),
+        'background-style': this.$element.css('background-style')
+      };
 
   this.$element.addClass('sloth is-loading');
 
@@ -29,6 +33,18 @@ BackgroundSloth.prototype.wrap = function () {
   }
 
   // Stretch background, inherit background properties from element
+  if (backgroundProperties.background === '') {
+    // Empty strings means either we're not in Chrome (inherits shorthand) or no background properties were set
+    // Just to make sure we should loop some background properties
+    delete backgroundProperties.background;
+    var properties = ['background-size', 'background-repeat', 'background-position', 'background-origin', 'background-clip', 'background-color']
+
+    for (var i = 0; i < properties.length; i++) {
+      var property = properties[i];
+      backgroundProperties[property] = this.$element.css(property);
+    }
+  }
+
   $background.css({
     'position': 'absolute',
     'top': 0,
@@ -36,8 +52,7 @@ BackgroundSloth.prototype.wrap = function () {
     'right': 0,
     'bottom': 0,
     'z-index': 1,
-    'background': this.$element.css('background')
-  }).hide().appendTo(this.$element);
+  }).css(backgroundProperties).hide().appendTo(this.$element);
 };
 
 BackgroundSloth.prototype.onLoad = function ($img) {
