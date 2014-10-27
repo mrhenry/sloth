@@ -143,6 +143,8 @@ Sloth.prototype.parseSource = function () {
  * -> Run source getter function (from the settings, if defined)
  *    to get the correct source, and use 'data-src-version' and
  *    'data-src' as fallbacks
+ *
+ * @params {String} modifier (aka. version)
  */
 Sloth.prototype.getSource = function (modifier) {
   var el, source, sourceGetterFn;
