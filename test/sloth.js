@@ -1,89 +1,130 @@
+(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.Sloth = factory();
+  }
+}(this, function() {
+"use strict";
+
+/**
+ * @namespace
+ */
+var sloth = {};
+
+
 /**
- * @constructor
+ * @constructor Sloth.Base
  *
- * @param {jQuery object} $element Parent for all animated elements
+ * @param {jQuery object} $element (Parent for all animated elements)
  */
 function Sloth($element) {
   if (typeof $element === 'undefined') {
+    printError('Cannot initialize Sloth, no element given.');
     return;
   }
 
-  Sloth.settings = Sloth.settings || {
-    versions: {
-      220: 'small',
-      640: 'medium',
-      1280: 'large'
-    },
-    retina: '',
-    ratio: 16 / 9
-  };
+  // settings
+  Sloth.settings = Sloth.settings || Sloth.defaultSettings;
 
-  this.$element = $element || $('[data-src]').first();
-
+  // element
+  this.$element = $element;
   this.isInline = this.$element[0].tagName.toLowerCase() === 'img';
 
-  this.source = this.$element.attr('data-src');
-
-  this.isWidthInherited = false;
-  this.ratio = Sloth.settings.ratio;
+  // space properties
   this.initialWidth = 0;
   this.initialHeight = 0;
   this.width = 0;
 
+  // initialize and bind
   this.init().bind();
 }
 
-/**
- * @todo
- * Create a universal export so we don't have make it a global
- */
-window.Sloth = Sloth;
 
 /**
- * Init everything
- * @return {Sloth} Instance for chainability
+ * @export
+ */
+sloth.Base = Sloth;
+
+
+/**
+ * Init
+ * -> Initialize everything
+ *
+ * @return {Sloth} instance for chainability
  */
 Sloth.prototype.init = function () {
-  var self = this;
-
   this.parseOptions();
-  this.calculateDimensions();
   this.parseSource();
+
+  this.calculateDimensions();
   this.wrap();
+
   this.preload($.proxy(this.onLoad, this));
 
   return this;
 };
 
-Sloth.prototype.wrap = function () {};
 
-Sloth.prototype.onLoad = function () {};
 
-Sloth.prototype.onError = function () {};
-
-Sloth.prototype.calculateDimensions = function () {
-  this.initialWidth = parseInt(this.$element.css('width'), 10);
-  this.width = (this.$element.get(0).style.width !== '') ? this.$element.get(0).style.width : this.initialWidth;
-  this.initialHeight = this.initialWidth * (1 / this.ratio);
-};
-
+/**
+ * [Preloading]
+ *
+ * Preload
+ * -> Make new img element, attach events and add the source
+ *
+ * @param {function} callback
+ */
 Sloth.prototype.preload = function (callback) {
-  var $img = $('<img />');
+  var $img = $(new Image());
 
   $img.hide().appendTo($(document.body))
       .on('load', function () {
         callback($img);
         $img.remove();
       })
-      .error($.proxy(this.onError, this))
+      .on('error', $.proxy(this.onError, this))
       .attr('src', this.source);
 };
 
+
+/**
+ * On load
+ * -> Preload 'load' callback
+ *
+ * @context {Sloth} instance
+ * @param {jQuery Object} $img (loaded image)
+ */
+Sloth.prototype.onLoad = function ($img) {};
+
+
+/**
+ * On error
+ * -> Preload 'error' callback
+ *
+ * @context {Sloth} instance
+ */
+Sloth.prototype.onError = function () {};
+
+
+
+/**
+ * [Parsers & Getters]
+ *
+ * Parse source
+ * -> Determine version and then the source
+ */
 Sloth.prototype.parseSource = function () {
-  var pixelRatio = window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio,
-      modifier = '',
+  var pixelRatio = window.devicePixelRatio ||
+                   window.webkitDevicePixelRatio ||
+                   window.mozDevicePixelRatio;
+
+  var modifier,
       neededWidth;
 
+  // determine version
   pixelRatio = (typeof pixelRatio === 'undefined') ? 1 : parseFloat(pixelRatio);
 
   for (var size in Sloth.settings.versions) {
@@ -98,60 +139,217 @@ Sloth.prototype.parseSource = function () {
     }
   }
 
-  if (!!this.$element.attr('data-src-' + modifier)) {
-    this.source = this.$element.attr('data-src-' + modifier);
-  } else {
-    this.source = this.$element.attr('data-src');
-  }
+  // get source
+  this.source = this.getSource(modifier);
 
+  // retina
   if (pixelRatio > 1 && !!Sloth.settings.retina) {
     this.source += Sloth.settings.retina;
   }
 };
 
+
+/**
+ * Get source
+ * -> Run source getter function (from the settings, if defined)
+ *    to get the correct source, and use 'data-src-version' and
+ *    'data-src' as fallbacks
+ */
+Sloth.prototype.getSource = function (modifier) {
+  var el, source, sourceGetterFn;
+
+  // target
+  el = this.$element;
+
+  // custom source getter function
+  sourceGetterFn = Sloth.settings.sourceGetterFunction;
+  if (sourceGetterFn) source = sourceGetterFn.call(this, modifier);
+
+  // default (and fallback)
+  if (!source || !source.length) source = el.attr('data-src-' + modifier);
+  if (!source || !source.length) source = el.attr('data-src');
+
+  // return
+  return source;
+};
+
+
+/**
+ * Parse options
+ * -> Attribute options with their fallbacks
+ */
 Sloth.prototype.parseOptions = function () {
+  // ratio
   if (!!this.$element.attr('data-ratio')) {
     var ratio = this.$element.attr('data-ratio').split(':'),
         width = parseInt(ratio[0], 10),
         height = (!!ratio[1]) ? parseInt(ratio[1], 10) : 1;
 
     this.ratio = width / height;
+  } else {
+    this.ratio = Sloth.settings.ratio;
   }
 };
 
+
+
+/**
+ * [Other]
+ *
+ * Calculate dimensions
+ * -> Determine initial width and height of the element
+ *    and the actual width
+ */
+Sloth.prototype.calculateDimensions = function () {
+  this.initialWidth = parseInt(this.$element.css('width'), 10);
+  this.initialHeight = this.initialWidth * (1 / this.ratio);
+  this.width = (this.$element.get(0).style.width !== '') ? this.$element.get(0).style.width : this.initialWidth;
+};
+
+
+/**
+ * Wrap
+ * -> Wraps the main element (this.$element) if needed
+ */
+Sloth.prototype.wrap = function () {
+  return this;
+};
+
+
+/**
+ * Bind
+ * -> Binds events
+ */
 Sloth.prototype.bind = function () {
   return this;
 };
 
-Sloth.prototype.reset = function () {
-  return this;
-};
 
+/**
+ * Unbind
+ * -> Unbinds events
+ */
 Sloth.prototype.unbind = function () {
   return this;
 };
 
+
+
+/**
+ * [@constructor level]
+ *
+ * Default settings
+ * -> Should not be modified directly (ie. always extend from this obj)
+ */
+Sloth.defaultSettings = {
+  versions: {
+    220: 'small',
+    640: 'medium',
+    1280: 'large'
+  },
+  retina: '',
+  ratio: 16 / 9
+};
+
+
+/**
+ * Extend from default settings
+ * -> Utility function
+ *
+ * @return {Object}
+ */
+Sloth.extendFromDefaultSettings = function (settings) {
+  return $.extend({}, Sloth.defaultSettings, settings || {});
+};
+
+
+/**
+ * Load
+ * -> Loop over each element that matches the jQuery selector,
+ *    make an inline sloth if its tagname is IMG
+ *    and otherwise make a background sloth
+ *
+ * @param {String} selector (jQuery selector)
+ */
 Sloth.load = function (selector) {
   $(selector).each(function () {
-    if ($(this)[0].tagName.toLowerCase() === 'img') {
-      new InlineSloth($(this));
+    if (this.tagName.toLowerCase() === 'img') {
+      new sloth.Inline($(this));
     } else {
-      new BackgroundSloth($(this));
+      new sloth.Background($(this));
     }
   });
 };
 
 
-function BackgroundSloth($element, options) {
-  Sloth.call(this, $element, options);
+
+/**
+ * [Private]
+ *
+ * Print error
+ */
+function printError(message) {
+  if (window.console && window.console.error) {
+    console.error(message);
+  }
 }
 
-window.BackgroundSloth = BackgroundSloth;
+/**
+ * @constructor Sloth.Background
+ */
+function BackgroundSloth($element, options) {
+  this.constructor.call(this, $element, options);
+}
 
-BackgroundSloth.prototype = new Sloth();
 
-BackgroundSloth.prototype.constructor = Sloth;
+/**
+ * Inherit from Base
+ */
+BackgroundSloth.prototype = new sloth.Base();
+BackgroundSloth.prototype.constructor = sloth.Base;
 
+
+/**
+ * @export
+ */
+sloth.Background = BackgroundSloth;
+
+
+
+/**
+ * [Preloading]
+ *
+ * On load (inherits from sloth.base)
+ */
+BackgroundSloth.prototype.onLoad = function ($img) {
+  var $element = this.$element;
+
+  $element.find('.sloth__background').css('background-image', 'url(' + $img.attr('src') + ')').fadeIn(880, function () {
+    $element.removeClass('is-loading');
+  });
+};
+
+
+/**
+ * On error (inherits from sloth.base)
+ */
+BackgroundSloth.prototype.onError = function () {
+  this.$element.removeClass('is-loading')
+               .addClass('is-errored');
+
+  try {
+    console.error('Could not load', this.source);
+  } catch(err) {}
+};
+
+
+
+
+/**
+ * [Other]
+ *
+ * Wrap (inherits from sloth.base)
+ */
 BackgroundSloth.prototype.wrap = function () {
   var $background = $('<div class="sloth__background" />'),
       backgroundProperties = {
@@ -181,7 +379,7 @@ BackgroundSloth.prototype.wrap = function () {
     // Empty strings means either we're not in Chrome (inherits shorthand) or no background properties were set
     // Just to make sure we should loop some background properties
     delete backgroundProperties.background;
-    var properties = ['background-size', 'background-repeat', 'background-position', 'background-origin', 'background-clip', 'background-color']
+    var properties = ['background-size', 'background-repeat', 'background-position', 'background-origin', 'background-clip', 'background-color'];
 
     for (var i = 0; i < properties.length; i++) {
       var property = properties[i];
@@ -199,101 +397,58 @@ BackgroundSloth.prototype.wrap = function () {
   }).css(backgroundProperties).hide().appendTo(this.$element);
 };
 
-BackgroundSloth.prototype.onLoad = function ($img) {
-  var $element = this.$element;
-
-  $element.find('.sloth__background').css('background-image', 'url(' + $img.attr('src') + ')').fadeIn(880, function () {
-    $element.removeClass('is-loading');
-  });
-};
+/**
+ * @constructor Sloth.Inline
+ */
+function InlineSloth($element, options) {
+  this.constructor.call(this, $element, options);
+}
 
 
 /**
- * Error handler
+ * Inherit from Base
  */
-BackgroundSloth.prototype.onError = function () {
-  this.$element.removeClass('is-loading')
-               .addClass('is-errored');
+InlineSloth.prototype = new sloth.Base();
+InlineSloth.prototype.constructor = sloth.Base;
 
-  try {
-    console.error('Could not load', this.source);
-  } catch(err) {}
-};
 
-function InlineSloth($element, options) {
-  Sloth.call(this, $element, options);
-}
+/**
+ * @export
+ */
+sloth.Inline = InlineSloth;
 
-window.InlineSloth = InlineSloth;
 
-InlineSloth.prototype = new Sloth();
 
-InlineSloth.prototype.constructor = Sloth;
-
-InlineSloth.prototype.calculateDimensions = function () {
-  var $parent = this.$element.parent(),
-      width = parseInt(this.$element.css('width'), 10);
-
-  if (!!width) {
-    // Element has specified width
-    this.initialWidth = width;
-    this.width = (this.$element.get(0).style.width !== '') ? this.$element.get(0).style.width : this.initialWidth;
-  } else {
-    // Inherit width
-    this.initialWidth = parseInt(this.$element.parent().css('width'));
-    this.width = this.initialWidth;
-
-    // When having a max-width specified, the image doesn't need a set width
-    if (this.$element.css('max-width') !== 'none') {
-      this.width = '';
-    }
-  }
-
-  this.initialHeight = this.initialWidth * (1 / this.ratio);
-};
-
-InlineSloth.prototype.wrap = function () {
-  var $wrapper = $('<span class="sloth is-loading" />');
-
-  // Take in the reserved space in the DOM
-  $wrapper.css({
-    'width': this.initialWidth,
-    'height': this.initialHeight,
-    'display': 'inline-block',
-    'max-width': this.$element.css('max-width'),
-    'font-size': 0
-  });
-
-  // Since the wrapper took over the positioning of the image,
-  // make the image fill the wrapper
-  this.$element.css({
-    'display': 'block',
-    'width': '100%',
-    'position': 'relative',
-    'z-index': 2
-  });
-
-  this.$element.wrap($wrapper);
-};
-
+/**
+ * [Preloading]
+ *
+ * On load (inherits from sloth.base)
+ */
 InlineSloth.prototype.onLoad = function ($img) {
   var $wrapper = this.$element.closest('.sloth');
+  var assumed_height;
 
-  // Set width to the actual CSS property or inherited width instead of fixed placeholder
+  // set width to the actual css property or inherited width
+  // instead of fixed placeholder
   $wrapper.css('width', this.width);
 
+  // fade in element
   this.$element.hide().attr('src', $img.attr('src')).fadeIn(880, function () {
     $wrapper.removeClass('is-loading');
   });
 
-  // Compensate the difference between the assumed ratio and the actual image height
-  $wrapper.animate({ 'height': this.initialWidth / $img.width() * $img.height() }, 220, function () {
+  // compensate the difference between the assumed ratio
+  // and the actual image height
+  assumed_height = (this.initialWidth / $img.width()) * $img.height();
+
+  $wrapper.animate({ height: assumed_height }, 220, function () {
     $wrapper.css('height', '');
   });
 };
 
+
 /**
- * Error handler
+ * On error (inherits from sloth.base)
  */
 InlineSloth.prototype.onError = function () {
   var $wrapper = this.$element.closest('.sloth');
@@ -305,3 +460,69 @@ InlineSloth.prototype.onError = function () {
     console.error('Could not load', this.source);
   } catch (err) {}
 };
+
+
+
+/**
+ * [Other]
+ *
+ * Calculate dimensions (inherits from sloth.base)
+ */
+InlineSloth.prototype.calculateDimensions = function () {
+  var $parent = this.$element.parent(),
+      width = parseInt(this.$element.css('width'), 10);
+
+  // -- width
+  if (!!width) {
+    // element has specified width
+    this.initialWidth = width;
+    this.width = (this.$element.get(0).style.width !== '') ?
+      this.$element.get(0).style.width :
+      this.initialWidth;
+
+  } else {
+    // inherit width
+    this.initialWidth = parseInt(this.$element.parent().css('width'));
+    this.width = this.initialWidth;
+
+    // when having a max-width specified, the image doesn't need a set width
+    if (this.$element.css('max-width') !== 'none') {
+      this.width = '';
+    }
+
+  }
+
+  // -- height
+  this.initialHeight = this.initialWidth * (1 / this.ratio);
+};
+
+
+/**
+ * Wrap (inherits from sloth.base)
+ */
+InlineSloth.prototype.wrap = function () {
+  var $wrapper = $('<span class="sloth is-loading" />');
+
+  // take in the reserved space in the dom
+  $wrapper.css({
+    'width': this.initialWidth,
+    'height': this.initialHeight,
+    'display': 'inline-block',
+    'max-width': this.$element.css('max-width'),
+    'font-size': 0
+  });
+
+  // since the wrapper took over the positioning of the image,
+  // make the image fill the wrapper
+  this.$element.css({
+    'display': 'block',
+    'width': '100%',
+    'position': 'relative',
+    'z-index': 2
+  });
+
+  this.$element.wrap($wrapper);
+};
+
+return sloth;
+}));
