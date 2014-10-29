@@ -1,0 +1,4 @@
+{
+  "latedef": false,
+  "predef": ["Sloth", "InlineSloth", "BackgroundSloth", "jQuery", "$"]
+}

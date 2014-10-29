@@ -1,15 +1,65 @@
+/**
+ * @constructor Sloth.Background
+ */
 function BackgroundSloth($element, options) {
-  Sloth.call(this, $element, options);
+  this.constructor.call(this, $element, options);
 }
 
-window.BackgroundSloth = BackgroundSloth;
 
-BackgroundSloth.prototype = new Sloth();
+/**
+ * Inherit from Base
+ */
+BackgroundSloth.prototype = $.extend({}, sloth.Base.prototype);
+BackgroundSloth.prototype.constructor = sloth.Base;
 
-BackgroundSloth.prototype.constructor = Sloth;
 
+/**
+ * @export
+ */
+sloth.Background = BackgroundSloth;
+
+
+
+/**
+ * [Preloading]
+ *
+ * On load (inherits from sloth.base)
+ */
+BackgroundSloth.prototype.onLoad = function ($img) {
+  var $element = this.$element;
+
+  $element.find('.sloth__background').css('background-image', 'url(' + $img.attr('src') + ')').fadeIn(880, function () {
+    $element.removeClass('is-loading');
+  });
+};
+
+
+/**
+ * On error (inherits from sloth.base)
+ */
+BackgroundSloth.prototype.onError = function () {
+  this.$element.removeClass('is-loading')
+               .addClass('is-errored');
+
+  try {
+    console.error('Could not load', this.source);
+  } catch(err) {}
+};
+
+
+
+
+/**
+ * [Other]
+ *
+ * Wrap (inherits from sloth.base)
+ */
 BackgroundSloth.prototype.wrap = function () {
-  var $background = $('<div class="sloth__background" />');
+  var $background = $('<div class="sloth__background" />'),
+      backgroundProperties = {
+        'background': this.$element.css('background'),
+        'background-style': this.$element.css('background-style')
+      };
 
   this.$element.addClass('sloth is-loading');
 
@@ -29,6 +79,18 @@ BackgroundSloth.prototype.wrap = function () {
   }
 
   // Stretch background, inherit background properties from element
+  if (backgroundProperties.background === '') {
+    // Empty strings means either we're not in Chrome (inherits shorthand) or no background properties were set
+    // Just to make sure we should loop some background properties
+    delete backgroundProperties.background;
+    var properties = ['background-size', 'background-repeat', 'background-position', 'background-origin', 'background-clip', 'background-color'];
+
+    for (var i = 0; i < properties.length; i++) {
+      var property = properties[i];
+      backgroundProperties[property] = this.$element.css(property);
+    }
+  }
+
   $background.css({
     'position': 'absolute',
     'top': 0,
@@ -36,14 +98,5 @@ BackgroundSloth.prototype.wrap = function () {
     'right': 0,
     'bottom': 0,
     'z-index': 1,
-    'background': this.$element.css('background')
-  }).hide().appendTo(this.$element);
-};
-
-BackgroundSloth.prototype.onLoad = function ($img) {
-  var $element = this.$element;
-
-  $element.find('.sloth__background').css('background-image', 'url(' + $img.attr('src') + ')').fadeIn(880, function () {
-    $element.removeClass('is-loading');
-  });
+  }).css(backgroundProperties).hide().appendTo(this.$element);
 };
