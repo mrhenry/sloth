@@ -9,7 +9,7 @@ function InlineSloth($element, options) {
 /**
  * Inherit from Base
  */
-InlineSloth.prototype = new sloth.Base();
+InlineSloth.prototype = $.extend({}, sloth.Base.prototype);
 InlineSloth.prototype.constructor = sloth.Base;
 
 

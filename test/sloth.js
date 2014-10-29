@@ -9,7 +9,7 @@
 }(this, function() {
 "use strict";
 
-/**
+/**
  * @namespace
  */
 var sloth = {};
@@ -57,9 +57,9 @@ sloth.Base = Sloth;
  */
 Sloth.prototype.init = function () {
   this.parseOptions();
+  this.calculateDimensions();
   this.parseSource();
 
-  this.calculateDimensions();
   this.wrap();
 
   this.preload($.proxy(this.onLoad, this));
@@ -154,6 +154,8 @@ Sloth.prototype.parseSource = function () {
  * -> Run source getter function (from the settings, if defined)
  *    to get the correct source, and use 'data-src-version' and
  *    'data-src' as fallbacks
+ *
+ * @params {String} modifier (aka. version)
  */
 Sloth.prototype.getSource = function (modifier) {
   var el, source, sourceGetterFn;
@@ -248,7 +250,8 @@ Sloth.defaultSettings = {
     1280: 'large'
   },
   retina: '',
-  ratio: 16 / 9
+  ratio: 16 / 9,
+  sourceGetterFunction: defaultSourceGetterFunction
 };
 
 
@@ -294,6 +297,34 @@ function printError(message) {
   }
 }
 
+
+/**
+ * Default source get function
+ *
+ * Based on Mr. Henry asset URL's:
+ * - //c.assets.sh/rgABo46c_YGa5cwq-w
+ * - //c.assets.sh/rgABo46c_YGa5cwq-w/original
+ *
+ * @param  {String} modifier
+ *
+ * @return {String}
+ */
+function defaultSourceGetterFunction(modifier) {
+  var src = this.$element.attr("data-src").split("/");
+
+  // Replace current modifier
+  if ( src.length == 5 ) {
+    src[4] = modifier;
+
+  // Append modifier
+  } else {
+    src.push(modifier);
+
+  }
+
+  return src.join("/");
+}
+
 /**
  * @constructor Sloth.Background
  */
@@ -305,7 +336,7 @@ function BackgroundSloth($element, options) {
 /**
  * Inherit from Base
  */
-BackgroundSloth.prototype = new sloth.Base();
+BackgroundSloth.prototype = $.extend({}, sloth.Base.prototype);
 BackgroundSloth.prototype.constructor = sloth.Base;
 
 
@@ -408,7 +439,7 @@ function InlineSloth($element, options) {
 /**
  * Inherit from Base
  */
-InlineSloth.prototype = new sloth.Base();
+InlineSloth.prototype = $.extend({}, sloth.Base.prototype);
 InlineSloth.prototype.constructor = sloth.Base;
 
 

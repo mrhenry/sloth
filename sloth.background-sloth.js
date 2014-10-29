@@ -9,7 +9,7 @@ function BackgroundSloth($element, options) {
 /**
  * Inherit from Base
  */
-BackgroundSloth.prototype = new sloth.Base();
+BackgroundSloth.prototype = $.extend({}, sloth.Base.prototype);
 BackgroundSloth.prototype.constructor = sloth.Base;
 
 
