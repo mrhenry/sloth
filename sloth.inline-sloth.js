@@ -28,23 +28,44 @@ sloth.Inline = InlineSloth;
 InlineSloth.prototype.onLoad = function ($img) {
   var $wrapper = this.$element.closest('.sloth');
   var assumed_height;
+  var orientation;
 
   // set width to the actual css property or inherited width
   // instead of fixed placeholder
   $wrapper.css('width', this.width);
 
-  // fade in element
-  this.$element.hide().attr('src', $img.attr('src')).fadeIn(880, function () {
-    $wrapper.removeClass('is-loading');
-  });
-
   // compensate the difference between the assumed ratio
   // and the actual image height
   assumed_height = (this.initialWidth / $img.width()) * $img.height();
 
-  $wrapper.animate({ height: assumed_height }, 220, function () {
-    $wrapper.css('height', '');
-  });
+  // Get the orientation
+  if ( this.width / assumed_height == 1 ) {
+    orientation = 'is-square';
+
+  } else if ( this.width / assumed_height < 1 ) {
+    orientation = 'is-portrait';
+
+  } else {
+    orientation = 'is-landscape';
+
+  }
+
+  // fade in element
+  this.$element
+    .hide()
+    .attr('src', $img.attr('src'))
+    .fadeIn(880, function () {
+      $wrapper.removeClass('is-loading');
+    });
+
+  // Animate wrapper to assumed height
+  $wrapper
+    .addClass(orientation)
+    .animate({
+      height: assumed_height
+    }, 220, function () {
+      $wrapper.css('height', '');
+    });
 };
 
 
@@ -102,16 +123,22 @@ InlineSloth.prototype.calculateDimensions = function () {
  * Wrap (inherits from sloth.base)
  */
 InlineSloth.prototype.wrap = function () {
-  var $wrapper = $('<span class="sloth is-loading" />');
+  var $wrapper = $('<span class="sloth is-loading" />'),
+      wrapper_opts;
 
-  // take in the reserved space in the dom
-  $wrapper.css({
+  wrapper_opts = {
     'width': this.initialWidth,
     'height': this.initialHeight,
     'display': 'inline-block',
-    'max-width': this.$element.css('max-width'),
     'font-size': 0
-  });
+  };
+
+  if ( this.$element.css('max-width') !== 'none' ) {
+    $.extend(wrapper_opts, { 'max-width': this.$element.css('max-width') });
+  }
+
+  // take in the reserved space in the dom
+  $wrapper.css(wrapper_opts);
 
   // since the wrapper took over the positioning of the image,
   // make the image fill the wrapper
