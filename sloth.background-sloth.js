@@ -1,4 +1,10 @@
 /**
+ * @namespace
+ */
+var sloth = sloth || {};
+
+
+/**
  * @constructor Sloth.Background
  */
 function BackgroundSloth($element, settings) {
@@ -17,7 +23,6 @@ BackgroundSloth.prototype.constructor = sloth.Base;
  * @export
  */
 sloth.Background = BackgroundSloth;
-
 
 
 /**
@@ -45,8 +50,6 @@ BackgroundSloth.prototype.onError = function () {
     console.error('Could not load', this.source);
   } catch(err) {}
 };
-
-
 
 
 /**

@@ -291,17 +291,16 @@ function printError(message) {
  * @return {String}
  */
 function defaultSourceGetterFunction(modifier) {
-  var src = this.$element.attr("data-src").split("/");
+  var src = this.$element.attr('data-src').split('/');
 
   // Replace current modifier
-  if ( src.length == 5 ) {
+  if (src.length === 5) {
     src[4] = modifier;
 
   // Append modifier
   } else {
     src.push(modifier);
-
   }
 
-  return src.join("/");
+  return src.join('/');
 }
