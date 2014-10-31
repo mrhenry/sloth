@@ -154,7 +154,9 @@
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script type="text/javascript" src="sloth.js"></script>
   <script type="text/javascript">
-    Sloth.Base.load('[data-src]');
+    Sloth.Base.load('[data-src]', {
+      sourceGetterFunction: false
+    });
   </script>
 </body>
 </html>
