@@ -22,8 +22,7 @@ var sloth = {};
  */
 function Sloth($element, settings) {
   if (typeof $element === 'undefined') {
-    printError('Cannot initialize Sloth, no element given.');
-    return;
+    throw 'Cannot initialize Sloth, no element given.';
   }
 
   // settings
@@ -68,7 +67,6 @@ Sloth.prototype.init = function () {
 };
 
 
-
 /**
  * [Preloading]
  *
@@ -107,7 +105,6 @@ Sloth.prototype.onLoad = function ($img) {};
  * @context {Sloth} instance
  */
 Sloth.prototype.onError = function () {};
-
 
 
 /**
@@ -194,7 +191,6 @@ Sloth.prototype.parseOptions = function () {
 };
 
 
-
 /**
  * [Other]
  *
@@ -236,7 +232,6 @@ Sloth.prototype.unbind = function () {
 };
 
 
-
 /**
  * [@constructor level]
  *
@@ -268,26 +263,11 @@ Sloth.load = function (selector, settings) {
   $(selector).each(function () {
     if (this.tagName.toLowerCase() === 'img') {
       new sloth.Inline($(this), settings);
-
     } else {
       new sloth.Background($(this), settings);
-
     }
   });
 };
-
-
-
-/**
- * [Private]
- *
- * Print error
- */
-function printError(message) {
-  if (window.console && window.console.error) {
-    console.error(message);
-  }
-}
 
 
 /**
