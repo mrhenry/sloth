@@ -1,4 +1,10 @@
 /**
+ * @namespace
+ */
+var sloth = sloth || {};
+
+
+/**
  * @constructor Sloth.Inline
  */
 function InlineSloth($element, settings) {
@@ -19,16 +25,15 @@ InlineSloth.prototype.constructor = sloth.Base;
 sloth.Inline = InlineSloth;
 
 
-
 /**
  * [Preloading]
  *
  * On load (inherits from sloth.base)
  */
 InlineSloth.prototype.onLoad = function ($img) {
-  var $wrapper = this.$element.closest('.sloth');
-  var assumed_height;
-  var orientation;
+  var $wrapper = this.$element.closest('.sloth'),
+      assumedHeight,
+      orientation;
 
   // set width to the actual css property or inherited width
   // instead of fixed placeholder
@@ -36,18 +41,15 @@ InlineSloth.prototype.onLoad = function ($img) {
 
   // compensate the difference between the assumed ratio
   // and the actual image height
-  assumed_height = (this.initialWidth / $img.width()) * $img.height();
+  assumedHeight = (this.initialWidth / $img.width()) * $img.height();
 
   // Get the orientation
-  if ( this.width / assumed_height == 1 ) {
+  if (this.width / assumedHeight == 1) {
     orientation = 'is-square';
-
-  } else if ( this.width / assumed_height < 1 ) {
+  } else if (this.width / assumedHeight < 1) {
     orientation = 'is-portrait';
-
   } else {
     orientation = 'is-landscape';
-
   }
 
   // fade in element
@@ -62,7 +64,7 @@ InlineSloth.prototype.onLoad = function ($img) {
   $wrapper
     .addClass(orientation)
     .animate({
-      height: assumed_height
+      height: assumedHeight
     }, 220, function () {
       $wrapper.css('height', '');
     });
@@ -97,21 +99,19 @@ InlineSloth.prototype.calculateDimensions = function () {
   // -- width
   if (!!width) {
     // element has specified width
-    this.initialWidth = width;
-    this.width = (this.$element.get(0).style.width !== '') ?
-      this.$element.get(0).style.width :
-      this.initialWidth;
+    this.initialWidth = this.width = width;
 
+    if (this.$element.get(0).style.width !== '') {
+      this.width = this.$element.get(0).style.width;
+    }
   } else {
     // inherit width
-    this.initialWidth = parseInt(this.$element.parent().css('width'));
-    this.width = this.initialWidth;
+    this.initialWidth = this.width = parseInt(this.$element.parent().css('width'));
 
     // when having a max-width specified, the image doesn't need a set width
     if (this.$element.css('max-width') !== 'none') {
       this.width = '';
     }
-
   }
 
   // -- height
@@ -124,21 +124,21 @@ InlineSloth.prototype.calculateDimensions = function () {
  */
 InlineSloth.prototype.wrap = function () {
   var $wrapper = $('<span class="sloth is-loading" />'),
-      wrapper_opts;
+      wrapperOptions;
 
-  wrapper_opts = {
+  wrapperOptions = {
     'width': this.initialWidth,
     'height': this.initialHeight,
     'display': 'inline-block',
     'font-size': 0
   };
 
-  if ( this.$element.css('max-width') !== 'none' ) {
-    $.extend(wrapper_opts, { 'max-width': this.$element.css('max-width') });
+  if (this.$element.css('max-width') !== 'none') {
+    $.extend(wrapperOptions, { 'max-width': this.$element.css('max-width') });
   }
 
   // take in the reserved space in the dom
-  $wrapper.css(wrapper_opts);
+  $wrapper.css(wrapperOptions);
 
   // since the wrapper took over the positioning of the image,
   // make the image fill the wrapper
