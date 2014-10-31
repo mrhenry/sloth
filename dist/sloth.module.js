@@ -20,14 +20,14 @@ var sloth = {};
  *
  * @param {jQuery object} $element (Parent for all animated elements)
  */
-function Sloth($element) {
+function Sloth($element, settings) {
   if (typeof $element === 'undefined') {
     printError('Cannot initialize Sloth, no element given.');
     return;
   }
 
   // settings
-  Sloth.settings = Sloth.settings || Sloth.defaultSettings;
+  this.settings = $.extend({}, Sloth.defaultSettings, settings || {});
 
   // element
   this.$element = $element;
@@ -127,9 +127,9 @@ Sloth.prototype.parseSource = function () {
   // determine version
   pixelRatio = (typeof pixelRatio === 'undefined') ? 1 : parseFloat(pixelRatio);
 
-  for (var size in Sloth.settings.versions) {
-    if (Sloth.settings.versions.hasOwnProperty(size)) {
-      var version = Sloth.settings.versions[size];
+  for (var size in this.settings.versions) {
+    if (this.settings.versions.hasOwnProperty(size)) {
+      var version = this.settings.versions[size];
 
       if (this.initialWidth > parseInt(size, 10)) {
         modifier = version;
@@ -143,8 +143,8 @@ Sloth.prototype.parseSource = function () {
   this.source = this.getSource(modifier);
 
   // retina
-  if (pixelRatio > 1 && !!Sloth.settings.retina) {
-    this.source += Sloth.settings.retina;
+  if (pixelRatio > 1 && !!this.settings.retina) {
+    this.source += this.settings.retina;
   }
 };
 
@@ -164,7 +164,7 @@ Sloth.prototype.getSource = function (modifier) {
   el = this.$element;
 
   // custom source getter function
-  sourceGetterFn = Sloth.settings.sourceGetterFunction;
+  sourceGetterFn = this.settings.sourceGetterFunction;
   if (sourceGetterFn) source = sourceGetterFn.call(this, modifier);
 
   // default (and fallback)
@@ -189,7 +189,7 @@ Sloth.prototype.parseOptions = function () {
 
     this.ratio = width / height;
   } else {
-    this.ratio = Sloth.settings.ratio;
+    this.ratio = this.settings.ratio;
   }
 };
 
@@ -256,30 +256,22 @@ Sloth.defaultSettings = {
 
 
 /**
- * Extend from default settings
- * -> Utility function
- *
- * @return {Object}
- */
-Sloth.extendFromDefaultSettings = function (settings) {
-  return $.extend({}, Sloth.defaultSettings, settings || {});
-};
-
-
-/**
  * Load
  * -> Loop over each element that matches the jQuery selector,
  *    make an inline sloth if its tagname is IMG
  *    and otherwise make a background sloth
  *
  * @param {String} selector (jQuery selector)
+ * @param {Object} settings
  */
-Sloth.load = function (selector) {
+Sloth.load = function (selector, settings) {
   $(selector).each(function () {
     if (this.tagName.toLowerCase() === 'img') {
-      new sloth.Inline($(this));
+      new sloth.Inline($(this), settings);
+
     } else {
-      new sloth.Background($(this));
+      new sloth.Background($(this), settings);
+
     }
   });
 };
@@ -328,8 +320,8 @@ function defaultSourceGetterFunction(modifier) {
 /**
  * @constructor Sloth.Background
  */
-function BackgroundSloth($element, options) {
-  this.constructor.call(this, $element, options);
+function BackgroundSloth($element, settings) {
+  this.constructor.call(this, $element, settings);
 }
 
 
@@ -431,8 +423,8 @@ BackgroundSloth.prototype.wrap = function () {
 /**
  * @constructor Sloth.Inline
  */
-function InlineSloth($element, options) {
-  this.constructor.call(this, $element, options);
+function InlineSloth($element, settings) {
+  this.constructor.call(this, $element, settings);
 }
 
 

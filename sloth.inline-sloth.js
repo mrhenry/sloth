@@ -1,8 +1,8 @@
 /**
  * @constructor Sloth.Inline
  */
-function InlineSloth($element, options) {
-  this.constructor.call(this, $element, options);
+function InlineSloth($element, settings) {
+  this.constructor.call(this, $element, settings);
 }
 
 

@@ -1,8 +1,8 @@
 /**
  * @constructor Sloth.Background
  */
-function BackgroundSloth($element, options) {
-  this.constructor.call(this, $element, options);
+function BackgroundSloth($element, settings) {
+  this.constructor.call(this, $element, settings);
 }
 
 
