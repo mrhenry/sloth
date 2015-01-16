@@ -370,12 +370,28 @@ BackgroundSloth.prototype.wrap = function () {
   }
 
   if (this.$element.html().length > 0) {
+    var $stub = $('<div class="sloth__content"></div>'),
+        defaultProperties = {
+          'position': 'relative',
+          'z-index': 2
+        };
+
+    $(document.body).append($stub);
+
+    if ($stub.css('position') === 'absolute' || $stub.css('position') === 'fixed') {
+      defaultProperties.position = $stub.css('position');
+    }
+
+    if ($stub.css('z-index') !== 'auto') {
+      defaultProperties['z-index'] = $stub.css('z-index');
+    }
+
+    $stub.remove();
+    $stub = null;
+
     // Wrap content
     this.$element.wrapInner(
-      $('<div class="sloth__content" />').css({
-        'position': 'relative',
-        'z-index': 2
-      })
+      $('<div class="sloth__content" />').css(defaultProperties)
     );
   }
 
