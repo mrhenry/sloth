@@ -239,6 +239,7 @@ Sloth.prototype.unbind = function () {
  * -> Should not be modified directly (ie. always extend from this obj)
  */
 Sloth.defaultSettings = {
+  fadeInDuration: 880,
   versions: {
     220: 'small',
     640: 'medium',
@@ -283,6 +284,10 @@ Sloth.load = function (selector, settings) {
  */
 function defaultSourceGetterFunction(modifier) {
   var src = this.$element.attr('data-src').split('/');
+
+  if (typeof modifier !== 'string') {
+    return src.join('/');
+  }
 
   // Replace current modifier
   if (src.length === 5) {
@@ -331,8 +336,10 @@ sloth.Background = BackgroundSloth;
 BackgroundSloth.prototype.onLoad = function ($img) {
   var $element = this.$element;
 
-  $element.find('.sloth__background').css('background-image', 'url("' + $img.attr('src') + '")').fadeIn(880, function () {
-    $element.removeClass('is-loading');
+  $element.find('.sloth__background')
+    .css('background-image', 'url("' + $img.attr('src') + '")')
+    .fadeIn(this.settings.fadeInDuration, function () {
+      $element.removeClass('is-loading');
   });
 };
 
@@ -476,7 +483,7 @@ InlineSloth.prototype.onLoad = function ($img) {
   this.$element
     .hide()
     .attr('src', $img.attr('src'))
-    .fadeIn(880, function () {
+    .fadeIn(this.settings.fadeInDuration, function () {
       $wrapper.removeClass('is-loading');
     });
 

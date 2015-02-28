@@ -56,7 +56,7 @@ InlineSloth.prototype.onLoad = function ($img) {
   this.$element
     .hide()
     .attr('src', $img.attr('src'))
-    .fadeIn(880, function () {
+    .fadeIn(this.settings.fadeInDuration, function () {
       $wrapper.removeClass('is-loading');
     });
 

@@ -228,6 +228,7 @@ Sloth.prototype.unbind = function () {
  * -> Should not be modified directly (ie. always extend from this obj)
  */
 Sloth.defaultSettings = {
+  fadeInDuration: 880,
   versions: {
     220: 'small',
     640: 'medium',
