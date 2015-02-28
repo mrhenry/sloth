@@ -273,6 +273,10 @@ Sloth.load = function (selector, settings) {
 function defaultSourceGetterFunction(modifier) {
   var src = this.$element.attr('data-src').split('/');
 
+  if (typeof modifier !== 'string') {
+    return src.join('/');
+  }
+
   // Replace current modifier
   if (src.length === 5) {
     src[4] = modifier;
