@@ -50,6 +50,8 @@ Ratio is the default ratio to use on inline images when loading. You can set thi
 
 ## Usage
 
+Install [https://github.com/protonet/jquery.inview](https://github.com/protonet/jquery.inview)
+
 ### Default globals pattern
 
 ```js
