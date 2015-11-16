@@ -11,6 +11,7 @@ Options can be set globally on the `Sloth` object.
 
 ```js
 Sloth.settings = {
+  forceLoad: false, // This will ignore load when in viewport
   versions: {
     220: 'small',
     640: 'medium',
