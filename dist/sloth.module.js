@@ -61,7 +61,17 @@ Sloth.prototype.init = function () {
 
   this.wrap();
 
-  this.preload($.proxy(this.onLoad, this));
+  if ( this.settings.forceLoad ) {
+    this.preload($.proxy(this.onLoad, this));
+
+  } else {
+    this.$element.one('inview', $.proxy(function(event, visible) {
+      if (visible) {
+        this.preload($.proxy(this.onLoad, this));
+      }
+    }, this));
+
+  }
 
   return this;
 };
