@@ -31,12 +31,14 @@ sloth.Background = BackgroundSloth;
  * On load (inherits from sloth.base)
  */
 BackgroundSloth.prototype.onLoad = function ($img) {
-  var $element = this.$element;
+  var $element = this.$element,
+      _this = this;
 
   $element.find('.sloth__background')
     .css('background-image', 'url("' + $img.attr('src') + '")')
     .fadeIn(this.settings.fadeInDuration, function () {
       $element.removeClass('is-loading');
+      $(window).trigger('sloth.loaded', _this);
   });
 };
 

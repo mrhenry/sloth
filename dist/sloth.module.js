@@ -344,12 +344,14 @@ sloth.Background = BackgroundSloth;
  * On load (inherits from sloth.base)
  */
 BackgroundSloth.prototype.onLoad = function ($img) {
-  var $element = this.$element;
+  var $element = this.$element,
+      _this = this;
 
   $element.find('.sloth__background')
     .css('background-image', 'url("' + $img.attr('src') + '")')
     .fadeIn(this.settings.fadeInDuration, function () {
       $element.removeClass('is-loading');
+      $(window).trigger('sloth.loaded', _this);
   });
 };
 
@@ -470,7 +472,8 @@ sloth.Inline = InlineSloth;
 InlineSloth.prototype.onLoad = function ($img) {
   var $wrapper = this.$element.closest('.sloth'),
       assumedHeight,
-      orientation;
+      orientation,
+      _this = this;
 
   // set width to the actual css property or inherited width
   // instead of fixed placeholder
@@ -504,6 +507,7 @@ InlineSloth.prototype.onLoad = function ($img) {
       height: assumedHeight
     }, 220, function () {
       $wrapper.css('height', '');
+      $(window).trigger('sloth.loaded', _this);
     });
 };
 

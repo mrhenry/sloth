@@ -33,7 +33,8 @@ sloth.Inline = InlineSloth;
 InlineSloth.prototype.onLoad = function ($img) {
   var $wrapper = this.$element.closest('.sloth'),
       assumedHeight,
-      orientation;
+      orientation,
+      _this = this;
 
   // set width to the actual css property or inherited width
   // instead of fixed placeholder
@@ -67,6 +68,7 @@ InlineSloth.prototype.onLoad = function ($img) {
       height: assumedHeight
     }, 220, function () {
       $wrapper.css('height', '');
+      $(window).trigger('sloth.loaded', _this);
     });
 };
 
